@@ -1,0 +1,31 @@
+#!/bin/sh
+
+exit_if_fails () {
+	if [ $? -ne 0 ]; then
+		pop_stashed_files
+		exit 1
+	fi
+}
+
+pop_stashed_files () {
+	if [ -n "$hasChanges" ]; then
+		(( step++ ))
+		echo "\033[0;34m$step. Applying stashed changes...\033[0m"
+		git stash pop -q
+	fi
+}
+
+step=1
+hasChanges=$(git diff)
+if [ -n "$hasChanges" ]; then
+	echo "\033[0;34m0. Stashing unstaged changes...\033[0m"
+	git stash push --keep-index
+fi
+echo "\033[0;34m$step. Analyzing...\033[0m"
+flutter analyze
+exit_if_fails
+(( step++ ))
+echo "\033[0;34m$step. Validating formatting...\033[0m"
+dart format --set-exit-if-changed lib test
+pop_stashed_files
+echo "\033[0;34m$step. Commit...\033[0m"
