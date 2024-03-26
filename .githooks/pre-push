@@ -48,4 +48,5 @@ post_test_process
 echo "\033[0;34m$step. Validating formatting...\033[0m"
 dart format --set-exit-if-changed lib test
 pop_stashed_files
+(( step++ ))
 echo "\033[0;34m$step. Push...\033[0m"
