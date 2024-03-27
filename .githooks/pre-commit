@@ -8,16 +8,21 @@ exit_if_fails () {
 }
 
 pop_stashed_files () {
-	if [ -n "$hasChanges" ]; then
+	if [ -n "$hasUnstagedChanges" ]; then
 		(( step++ ))
 		echo "\033[0;34m$step. Applying stashed changes...\033[0m"
 		git stash pop -q
 	fi
 }
 
+hasStagedChanges=$(git diff --staged)
+if [ "$hasStagedChanges" == "" ]; then
+	echo "\033[0;31m[Error] There are no staged changes to commit\033[0m"
+	exit 1
+fi
 step=1
-hasChanges=$(git diff)
-if [ -n "$hasChanges" ]; then
+hasUnstagedChanges=$(git diff)
+if [ -n "$hasUnstagedChanges" ]; then
 	echo "\033[0;34m0. Stashing unstaged changes...\033[0m"
 	git stash push --keep-index
 fi
